@@ -1,0 +1,54 @@
+import { v4 } from "uuid";
+import { Employee, Expense } from "../entities/entities";
+import NotFoundError from "../entities/notfounderror";
+import { CosmosClient, Database} from "@azure/cosmos";
+import { EmpServices } from "../services/empServices";
+
+// const employeeDB = new CosmosClient(process.env.COSMOS_CONNECTION); // this is talking to the DB
+// const scoop = employeeDB.database("project1");
+// const bucket = scoop.container("employee");
+// //empServices: EmpServices = new EmpServices();
+
+
+export default interface ExpenseServices{
+  createExpense(empId:string, request:Expense):Promise<Employee>;
+}
+
+
+
+  /*
+    method: create expense
+    takes in employee and a new expense
+    finds employee
+    retrieves expense array inside of given employee
+    takes new expense array as second argument
+    pushes newExpense to expense array as a new expense
+    returns success message via updated employee, 
+    can probably use updateEmployee as finish to send newly updated
+    employee back to cosmosDB
+
+    */
+
+export class ExpServ implements ExpenseServices{
+  empServices: EmpServices = new EmpServices();
+    async createExpense(empId:string,request:Expense): Promise<Employee> {
+        
+        const anEmployee = await this.empServices.getEmployeeById(empId);
+    // const currentExpenses = await empServices.getEmplExpenses(anEmployee.username);
+        //let newRequest = request;
+        const newRequest= {id:v4(), description:request.description, amount:request.amount,status:0, date:new Date().toLocaleDateString("en-US") };
+        
+
+      
+        //currentExpenses.push(newRequest);
+        anEmployee.expenses.push(newRequest);
+        await this.empServices.update(anEmployee);
+        
+        return anEmployee;
+        
+
+    }
+
+
+    
+}
