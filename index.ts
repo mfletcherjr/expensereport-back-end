@@ -40,7 +40,7 @@ app.get('/employee', async (req, res)=>{
     //   const response = req.query;
     const employeeList: Employee[] = await empServices.employeeRoster();
     res.status(201);
-    res.send(employeeList);
+    res.send(JSON.stringify({employeeList:employeeList}));
     // console.log (res.send(employeeList));
 
 });
@@ -72,11 +72,13 @@ app.get('/employee/:id', async (req,res)=>{
 //patch for logging in as user
 app.patch('/login', async (req,res)=>{
     try {
-        const body:{username:string, password:string} = req.body;
-       
-        const employee:Employee = await loginService.loginWithUsernamePassword(body.username, body.password);
+        const {username, password} = req.body;
+        console.log(username);
+        console.log(password);
+        const employee:Employee = await loginService.loginWithUsernamePassword(username,password);
         res.status(201);
-        res.send(employee);
+        res.send(JSON.stringify({employee:employee}));
+      
         
     } catch (error) {
         if (error instanceof NotFoundError) {
@@ -94,9 +96,10 @@ app.patch('/approve/:id', async(req,res)=>{
 try {
     const {id}= req.params;
     await empServices.approve(id);
-    
+    const message = "Expense status updated to approved";
     res.status(200);
-    res.send("Expense status updated to approved");
+    console.log(message);
+    res.send(JSON.stringify({id:id}));
     
     
 } catch (error) {
@@ -116,11 +119,11 @@ app.patch('/reject/:id', async(req,res)=>{
     try {
         const {id}= req.params;
         await empServices.reject(id);
-        
+        const message = "Expense status updated to rejected";
         
         res.status(200);
-        res.send("Expense status updated to rejected");
-        
+        console.log(message);
+        res.send(JSON.stringify({id:id}));
         
     } catch (error) {
         if (error instanceof NotFoundError) {
@@ -142,11 +145,12 @@ app.patch('/reject/:id', async(req,res)=>{
             console.log(id);
             console.log(expense);
             await empServices.createExpense(id,expense);
-            
+            const message= "Expense added to employee";
             
             res.status(200);
-            res.send("Expense added to employee");
+            console.log(message);
             
+            res.send(JSON.stringify({id:id,expense:expense}));
             
         } catch (error) {
             if (error instanceof NotFoundError) {
